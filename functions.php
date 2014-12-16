@@ -17,7 +17,7 @@ function get_directories_to_search($dirs, $pattern) {
 }
 
 function get_all_directories($root, $max_depth = 3) {
-  $result = array();
+  $result = array($root);
   if ($handle = opendir($root)) {
     while (false !== ($entry = readdir($handle))) {
       if ($entry != "." && $entry != ".." && is_dir($root . "/" . $entry)) {
@@ -25,6 +25,19 @@ function get_all_directories($root, $max_depth = 3) {
           if ($max_depth > 1) {
             $result = array_merge($result, get_all_directories($root . "/" . $entry, $max_depth - 1));
           }
+        }
+    }
+    closedir($handle);
+  }
+  return $result;
+}
+
+function get_all_immediate_files($root, $extension) {
+  $result = array();
+  if ($handle = opendir($root)) {
+    while (false !== ($entry = readdir($handle))) {
+      if ($entry != "." && $entry != ".." && substr(strtolower($entry), -strlen($extension)) == strtolower($extension) && !is_dir($root . "/" . $entry)) {
+          $result[] = $root . "/" . $entry;
         }
     }
     closedir($handle);
@@ -90,4 +103,17 @@ function get_all_files($root, $max_depth = 3) {
  */
 function phpescapestring($s) {
   return str_replace("\"", "\\\"", $s);
+}
+
+function write_out_formatted_json($fp, $result) {
+  $first = true;
+  fwrite($fp, "{");
+  foreach ($result as $key => $value) {
+    if (!$first) {
+      fwrite($fp, ",");
+    }
+    $first = false;
+    fwrite($fp, "\n  " . json_encode($key) . ": " . json_encode($value));
+  }
+  fwrite($fp, "\n}\n");
 }

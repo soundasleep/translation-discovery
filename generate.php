@@ -105,16 +105,7 @@ foreach ($translations as $code => $includes) {
   }
 
   // we write this out manually so we can format it
-  $first = true;
-  fwrite($fp, "{");
-  foreach ($result as $key => $value) {
-    if (!$first) {
-      fwrite($fp, ",");
-    }
-    $first = false;
-    fwrite($fp, "\n  " . json_encode($key) . ": " . json_encode($value));
-  }
-  fwrite($fp, "\n}\n");
+  write_out_formatted_json($fp, $result);
   fclose($fp);
 
   echo "Wrote " . count($result) . " $code strings to '$out'\n";
@@ -141,5 +132,3 @@ foreach ($translations as $code => $includes) {
 
   }
 }
-
-// TODO write PHP files
