@@ -66,6 +66,37 @@ the locale strings in a format suitable for PHP `require()`.
 
 These files can then be passed along to the next step in a build chain.
 
+## Discovering translation strings
+
+Particularly if you are using the [openclerk/i18n](https://github.com/openclerk/i18n) project, you
+can use the find script to locale potentially matching translation strings and output them into
+a template file in JSON.
+
+Update `translation-discovery.json` in your project, to define the source locations:
+
+```json
+{
+  "templates": ["vendor/openclerk", "core", "site"],
+  "template": "site/locale/template.json"
+}
+```
+
+Run the find script, either with your build script or manually, with
+a given root directory:
+
+```
+php -f vendor/soundasleep/translation-discovery/find.php .
+```
+
+This script will find all instances of the following translation strings, and output them to
+the `template` JSON folder:
+
+1. `t("string")`
+1. `ht("string")`
+1. `plural("string", 1)` and `plural("string", "strings", 1)`
+1. `"string" /* i18n */`
+1. And the single-quote versions of these patterns
+
 ## TODOs
 
 1. Actually publish on Packagist
