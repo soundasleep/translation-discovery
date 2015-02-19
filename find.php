@@ -50,6 +50,13 @@ function strip_i18n_key($key) {
   return trim($key);
 }
 
+function strip_comments($text) {
+  $text = preg_replace("#([^:])//[^\n]+#ims", "\\1", $text);
+  // only strip phpdoc comments
+  $text = preg_replace("#/\\*\\*.+?\\*/#ims", "", $text);
+  return $text;
+}
+
 // iterate over all subdirectories for .php files
 $found = array();
 foreach ($all_dirs as $dir) {
@@ -69,6 +76,7 @@ foreach ($all_dirs as $dir) {
     }
 
     $input = file_get_contents($f);
+    $input = strip_comments($input);
 
     $translation_functions = array_merge(
       $json['translation_functions'],
