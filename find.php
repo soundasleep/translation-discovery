@@ -24,9 +24,10 @@ $json = json_decode(file_get_contents($root . "/translation-discovery.json"), tr
 $json += array(
   'templates' => 'vendor/*/*',
   'template' => 'locale/template.json',
+  'template_text' => false,
   'templates_ignore' => array('/test/', '/tests/'),
   'translation_functions' => array(),     // additional translation functions
-  'depth' => 3
+  'depth' => 3,
 );
 
 if (!is_array($json['templates'])) {
@@ -180,3 +181,20 @@ write_out_formatted_json($fp, $found);
 fclose($fp);
 
 echo "Wrote template file '" . $json['template'] . "'\n";
+
+// print out to a text file, optionally
+if ($json['template_text']) {
+  $fp = fopen($root . "/" . $json['template_text'], "w");
+  if (!$fp) {
+    throw new Exception("Could not open destination file '" . $json['template_text'] . "' for writing");
+  }
+
+  foreach ($found as $key) {
+    // we need to replace :placeholder with <placeholder>
+    $key = preg_replace("/:([a-z0-9_]+)/i", "<\\1>", $key);
+    fwrite($fp, $key . "\n");
+  }
+  fclose($fp);
+
+  echo "Wrote template file '" . $json['template_text'] . "'\n";
+}

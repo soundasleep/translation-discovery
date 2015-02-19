@@ -1,0 +1,6 @@
+{
+  "templates": ["src"],
+  "templates_ignore": [],
+  "template": "template.json",
+  "template_text": "template.txt"
+}
