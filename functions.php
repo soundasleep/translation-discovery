@@ -51,7 +51,7 @@ function make_target_directories($dirs) {
     if (substr($path, -1) !== "/") {
       $path = substr($path, 0, strrpos($path, "/"));
     }
-    if (!file_exists($path)) {
+    if (!file_exists($path) && $path) {
       echo "Making directory '$path' recursively...\n";
       mkdir($path, 0777, true);
     }

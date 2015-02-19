@@ -24,6 +24,7 @@ $json = json_decode(file_get_contents($root . "/translation-discovery.json"), tr
 $json += array(
   'templates' => 'vendor/*/*',
   'template' => 'locale/template.json',
+  'templates_ignore' => array('/test'),
   'depth' => 3
 );
 
@@ -55,10 +56,17 @@ foreach ($all_dirs as $dir) {
   $files = get_all_immediate_files($dir, ".php");
 
   foreach ($files as $f) {
-    // don't look within tests folders
-    if (strpos(str_replace("\\", "/", $f), "/test/") !== false) {
+    // don't look within ignored folders
+    $should_ignore = false;
+    foreach ($json['templates_ignore'] as $should_ignore_dir) {
+      if (strpos(str_replace("\\", "/", $f), $should_ignore_dir) !== false) {
+        $should_ignore = true;
+      }
+    }
+    if ($should_ignore) {
       continue;
     }
+
     $input = file_get_contents($f);
 
     // find instances of t() and ht()
@@ -146,7 +154,7 @@ echo "Found " . count($found) . " potential translation keys\n";
 ksort($found);
 
 // print out to a JSON file
-$fp = fopen($json['template'], "w");
+$fp = fopen($root . "/" . $json['template'], "w");
 if (!$fp) {
   throw new Exception("Could not open destination file '" . $json['template'] . "' for writing");
 }
