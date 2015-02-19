@@ -1,16 +1,13 @@
 <?php
 
-/**
- * Basic template finding
- */
-class BasicFindTest extends AbstractFindTest {
+class RecursiveTest extends AbstractFindTest {
 
   function testJson() {
     $json = json_decode(file_get_contents($this->getJsonFile()), true /* assoc */);
 
     $this->assertEquals(array(
+        "Cat" => "Cat",
         "Hello" => "Hello",
-        "Hello, world!" => "Hello, world!",
         "World" => "World",
       ), $json);
   }
