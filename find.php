@@ -24,7 +24,8 @@ $json = json_decode(file_get_contents($root . "/translation-discovery.json"), tr
 $json += array(
   'templates' => 'vendor/*/*',
   'template' => 'locale/template.json',
-  'templates_ignore' => array('/test'),
+  'templates_ignore' => array('/test/', '/tests/'),
+  'translation_functions' => array(),     // additional translation functions
   'depth' => 3
 );
 
@@ -69,20 +70,27 @@ foreach ($all_dirs as $dir) {
 
     $input = file_get_contents($f);
 
+    $translation_functions = array_merge(
+      $json['translation_functions'],
+      array('t', 'ht')
+    );
+
     // find instances of t() and ht()
-    $matches = false;
-    if (preg_match_all("#[ \t\n(][h]?t\\((|['\"][^\"]+[\"'],[ \t\n])\"([^\"]+)\"(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[2] = strip_i18n_key($match[2]);
-        $found[$match[2]] = $match[2];
+    foreach ($translation_functions as $translation_function) {
+      $matches = false;
+      if (preg_match_all("#[ \t\n(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])\"([^\"]+)\"(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[2] = strip_i18n_key($match[2]);
+          $found[$match[2]] = $match[2];
+        }
       }
-    }
-    if (preg_match_all("#[ \t\n(][h]?t\\((|['\"][^\"]+[\"'],[ \t\n])'([^']+)'(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[2] = strip_i18n_key($match[2]);
-        $found[$match[2]] = $match[2];
+      if (preg_match_all("#[ \t\n(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])'([^']+)'(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[2] = strip_i18n_key($match[2]);
+          $found[$match[2]] = $match[2];
+        }
       }
     }
 

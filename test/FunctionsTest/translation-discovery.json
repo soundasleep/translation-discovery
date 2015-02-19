@@ -1,0 +1,6 @@
+{
+  "templates": ["src"],
+  "templates_ignore": [],
+  "template": "template.json",
+  "translation_functions": ["ct", "urlencode"]
+}
