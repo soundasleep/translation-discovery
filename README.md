@@ -95,7 +95,7 @@ the `template` JSON folder:
 
 ## Example projects
 
-# [Openclerk](https://github.com/soundasleep/openclerk)
+1. [Openclerk](https://github.com/soundasleep/openclerk)
 
 ## TODOs
 
