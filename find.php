@@ -32,6 +32,8 @@ $json += array(
   'template_text' => false,
   'templates_ignore' => array('/test/', '/tests/'),
   'translation_functions' => array('t', 'ht'),     // translation functions
+  'translation_markers' => array('i18n'),     // string i18n markers
+  'include_plural' => true,
   'depth' => 3,
 );
 
@@ -104,54 +106,58 @@ foreach ($all_dirs as $dir) {
     }
 
     // find instances of plural()
-    if (preg_match_all("#[ \t\n(]plural\\(\"([^\"]+)\",[ \t\n][^\"].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[1] = strip_i18n_key($match[1]);
-        $found[$match[1]] = $match[1];
-        $found[$match[1] . "s"] = $match[1] . "s";
+    if ($json['include_plural']) {
+      if (preg_match_all("#[ \t\n(]plural\\(\"([^\"]+)\",[ \t\n][^\"].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[1] = strip_i18n_key($match[1]);
+          $found[$match[1]] = $match[1];
+          $found[$match[1] . "s"] = $match[1] . "s";
+        }
       }
-    }
-    if (preg_match_all("#[ \t\n(]plural\\('([^']+)',[ \t\n][^'].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[1] = strip_i18n_key($match[1]);
-        $found[$match[1]] = $match[1];
-        $found[$match[1] . "s"] = $match[1] . "s";
+      if (preg_match_all("#[ \t\n(]plural\\('([^']+)',[ \t\n][^'].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[1] = strip_i18n_key($match[1]);
+          $found[$match[1]] = $match[1];
+          $found[$match[1] . "s"] = $match[1] . "s";
+        }
       }
-    }
-    if (preg_match_all("#[ \t\n(]plural\\(\"([^\"]+)\",[ \t\n]\"([^\"]+)\",[ \t\n][^\"].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[1] = strip_i18n_key($match[1]);
-        $match[2] = strip_i18n_key($match[2]);
-        $found[$match[1]] = $match[1];
-        $found[$match[2]] = $match[2];
+      if (preg_match_all("#[ \t\n(]plural\\(\"([^\"]+)\",[ \t\n]\"([^\"]+)\",[ \t\n][^\"].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[1] = strip_i18n_key($match[1]);
+          $match[2] = strip_i18n_key($match[2]);
+          $found[$match[1]] = $match[1];
+          $found[$match[2]] = $match[2];
+        }
       }
-    }
-    if (preg_match_all("#[ \t\n(]plural\\('([^']+)',[ \t\n]'([^']+)',[ \t\n][^'].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[1] = strip_i18n_key($match[1]);
-        $match[2] = strip_i18n_key($match[2]);
-        $found[$match[1]] = $match[1];
-        $found[$match[2]] = $match[2];
+      if (preg_match_all("#[ \t\n(]plural\\('([^']+)',[ \t\n]'([^']+)',[ \t\n][^'].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[1] = strip_i18n_key($match[1]);
+          $match[2] = strip_i18n_key($match[2]);
+          $found[$match[1]] = $match[1];
+          $found[$match[2]] = $match[2];
+        }
       }
     }
 
     // find instances of "string" /* i18n */
-    if (preg_match_all("#\"([^\"]+)\" /\\* i18n \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[2] = strip_i18n_key($match[1]);
-        $found[$match[1]] = $match[1];
+    foreach ($json['translation_markers'] as $translation_marker) {
+      if (preg_match_all("#\"([^\"]+)\" /\\* " . $translation_marker . " \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[2] = strip_i18n_key($match[1]);
+          $found[$match[1]] = $match[1];
+        }
       }
-    }
-    if (preg_match_all("#'([^']+)' /\\* i18n \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
-      foreach ($matches as $match) {
-        // remove whitespace that will never display
-        $match[2] = strip_i18n_key($match[1]);
-        $found[$match[1]] = $match[1];
+      if (preg_match_all("#'([^']+)' /\\* " . $translation_marker . " \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+          // remove whitespace that will never display
+          $match[2] = strip_i18n_key($match[1]);
+          $found[$match[1]] = $match[1];
+        }
       }
     }
   }

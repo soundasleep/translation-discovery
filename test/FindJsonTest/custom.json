@@ -2,5 +2,6 @@
   "templates": ["src"],
   "templates_ignore": [],
   "template": "client.json",
-  "translation_functions": ["ct"]
+  "translation_functions": ["ct"],
+  "include_plural": false
 }

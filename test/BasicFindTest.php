@@ -12,6 +12,8 @@ class BasicFindTest extends AbstractFindTest {
         "Hello" => "Hello",
         "Hello, world!" => "Hello, world!",
         "World" => "World",
+        "book" => "book",
+        "books" => "books",
       ), $json);
   }
 
