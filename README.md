@@ -16,11 +16,7 @@ and run `composer update` to install it into your project:
 {
   "require": {
     "soundasleep/translation-discovery": "dev-master"
-  },
-  "repositories": [{
-    "type": "vcs",
-    "url": "https://github.com/soundasleep/translation-discovery"
-  }]
+  }
 }
 ```
 
@@ -97,14 +93,15 @@ the `template` JSON folder:
 1. `"string" /* i18n */`
 1. And the single-quote versions of these patterns
 
+## Example projects
+
+# [Openclerk](https://github.com/soundasleep/openclerk)
+
 ## TODOs
 
-1. Actually publish on Packagist
-2. More documentation, especially default `translation-discovery.json` parameters
-3. Tests
-4. Example projects using _translation-discovery_
-5. Create `grunt` task `grunt-php-translation-discovery` to wrap the manual PHP command
-6. Release 0.1 version
+1. More documentation, especially default `translation-discovery.json` parameters
+1. Create `grunt` task `grunt-php-translation-discovery` to wrap the manual PHP command
+1. Release 0.1 version
 
 ## See also
 
