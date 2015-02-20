@@ -14,11 +14,16 @@ if (count($argv) < 2) {
 }
 
 $root = $argv[1];
-if (!file_exists($root . "/translation-discovery.json")) {
-  throw new Exception("No translation-discovery.json found in '$root'");
+$json_file = isset($argv[2]) ? $argv[2] : $root . "/translation-discovery.json";
+
+if (!file_exists($json_file)) {
+  throw new Exception("$json_file was not found");
 }
 
-$json = json_decode(file_get_contents($root . "/translation-discovery.json"), true /* assoc */);
+$json = json_decode(file_get_contents($json_file), true /* assoc */);
+if (!$json) {
+  throw new Exception("$json_file was not valid JSON");
+}
 
 // add default parameters
 $json += array(
@@ -26,7 +31,7 @@ $json += array(
   'template' => 'locale/template.json',
   'template_text' => false,
   'templates_ignore' => array('/test/', '/tests/'),
-  'translation_functions' => array(),     // additional translation functions
+  'translation_functions' => array('t', 'ht'),     // translation functions
   'depth' => 3,
 );
 
@@ -79,13 +84,8 @@ foreach ($all_dirs as $dir) {
     $input = file_get_contents($f);
     $input = strip_comments($input);
 
-    $translation_functions = array_merge(
-      $json['translation_functions'],
-      array('t', 'ht')
-    );
-
     // find instances of t() and ht()
-    foreach ($translation_functions as $translation_function) {
+    foreach ($json['translation_functions'] as $translation_function) {
       $matches = false;
       if (preg_match_all("#[ \t\n(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])\"([^\"]+)\"(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {

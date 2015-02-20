@@ -10,7 +10,7 @@ abstract class AbstractFindTest extends PHPUnit_Framework_TestCase {
   }
 
   function setUp() {
-    $this->doFind(__DIR__ . "/" . $this->getDirectory());
+    $this->doFind(__DIR__ . "/" . $this->getDirectory(), $this->getJsonInputFile());
   }
 
   function tearDown() {
@@ -21,6 +21,10 @@ abstract class AbstractFindTest extends PHPUnit_Framework_TestCase {
     return __DIR__ . "/" . $this->getDirectory() . "/template.json";
   }
 
+  function getJsonInputFile() {
+    return false;   // default
+  }
+
   function testTemplateJsonExists() {
     $this->assertTrue(file_exists($this->getJsonFile()), $this->getJsonFile() . " should exist");
   }
@@ -28,9 +32,13 @@ abstract class AbstractFindTest extends PHPUnit_Framework_TestCase {
   /**
    * Execute the find.php script
    * In the future, this should be done by instantiating a class rather than running shell commands
+   * @param $json optional JSON input file for the find script
    */
-  function doFind($dir) {
+  function doFind($dir, $json = false) {
     $command = "php -f " . escapeshellarg(__DIR__ . "/../find.php") . " " . escapeshellarg($dir);
+    if ($json) {
+      $command .= " " . escapeshellarg($json);
+    }
     if ($this->isDebug()) {
       echo ">>> $command\n";
       $last = system($command, $return);
