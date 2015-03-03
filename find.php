@@ -33,6 +33,7 @@ $json += array(
   'templates_ignore' => array('/test/', '/tests/'),
   'translation_functions' => array('t', 'ht'),     // translation functions
   'translation_markers' => array('i18n'),     // string i18n markers
+  'extensions' => array('.php', '.haml'),     // file types to search through
   'include_plural' => true,
   'depth' => 3,
 );
@@ -69,94 +70,96 @@ function strip_comments($text) {
 $found = array();
 foreach ($all_dirs as $dir) {
   // get all files
-  $files = get_all_immediate_files($dir, ".php");
+  foreach ($json['extensions'] as $extension) {
+    $files = get_all_immediate_files($dir, $extension);
 
-  foreach ($files as $f) {
-    // don't look within ignored folders
-    $should_ignore = false;
-    foreach ($json['templates_ignore'] as $should_ignore_dir) {
-      if (strpos(str_replace("\\", "/", $f), $should_ignore_dir) !== false) {
-        $should_ignore = true;
+    foreach ($files as $f) {
+      // don't look within ignored folders
+      $should_ignore = false;
+      foreach ($json['templates_ignore'] as $should_ignore_dir) {
+        if (strpos(str_replace("\\", "/", $f), $should_ignore_dir) !== false) {
+          $should_ignore = true;
+        }
       }
-    }
-    if ($should_ignore) {
-      continue;
-    }
+      if ($should_ignore) {
+        continue;
+      }
 
-    $input = file_get_contents($f);
-    $input = strip_comments($input);
+      $input = file_get_contents($f);
+      $input = strip_comments($input);
 
-    // find instances of t() and ht()
-    foreach ($json['translation_functions'] as $translation_function) {
-      $matches = false;
-      if (preg_match_all("#[ \t\n(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])\"([^\"]+)\"(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[2] = strip_i18n_key($match[2]);
-          $found[$match[2]] = $match[2];
+      // find instances of t() and ht()
+      foreach ($json['translation_functions'] as $translation_function) {
+        $matches = false;
+        if (preg_match_all("#[ \t\n=\-(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])\"([^\"]+)\"(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[2] = strip_i18n_key($match[2]);
+            $found[$match[2]] = $match[2];
+          }
+        }
+        if (preg_match_all("#[ \t\n=\-(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])'([^']+)'(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[2] = strip_i18n_key($match[2]);
+            $found[$match[2]] = $match[2];
+          }
         }
       }
-      if (preg_match_all("#[ \t\n(]" . $translation_function . "\\((|['\"][^\"]+[\"'],[ \t\n])'([^']+)'(|,[ \t\n].+?)\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[2] = strip_i18n_key($match[2]);
-          $found[$match[2]] = $match[2];
-        }
-      }
-    }
 
-    // find instances of plural()
-    if ($json['include_plural']) {
-      if (preg_match_all("#[ \t\n(]plural\\(\"([^\"]+)\",[ \t\n][^\"].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[1] = strip_i18n_key($match[1]);
-          $found[$match[1]] = $match[1];
-          $found[$match[1] . "s"] = $match[1] . "s";
+      // find instances of plural()
+      if ($json['include_plural']) {
+        if (preg_match_all("#[ \t\n=\-(]plural\\(\"([^\"]+)\",[ \t\n][^\"].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[1] = strip_i18n_key($match[1]);
+            $found[$match[1]] = $match[1];
+            $found[$match[1] . "s"] = $match[1] . "s";
+          }
+        }
+        if (preg_match_all("#[ \t\n=\-(]plural\\('([^']+)',[ \t\n][^'].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[1] = strip_i18n_key($match[1]);
+            $found[$match[1]] = $match[1];
+            $found[$match[1] . "s"] = $match[1] . "s";
+          }
+        }
+        if (preg_match_all("#[ \t\n=\-(]plural\\(\"([^\"]+)\",[ \t\n]\"([^\"]+)\",[ \t\n][^\"].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[1] = strip_i18n_key($match[1]);
+            $match[2] = strip_i18n_key($match[2]);
+            $found[$match[1]] = $match[1];
+            $found[$match[2]] = $match[2];
+          }
+        }
+        if (preg_match_all("#[ \t\n=\-(]plural\\('([^']+)',[ \t\n]'([^']+)',[ \t\n][^'].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[1] = strip_i18n_key($match[1]);
+            $match[2] = strip_i18n_key($match[2]);
+            $found[$match[1]] = $match[1];
+            $found[$match[2]] = $match[2];
+          }
         }
       }
-      if (preg_match_all("#[ \t\n(]plural\\('([^']+)',[ \t\n][^'].+?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[1] = strip_i18n_key($match[1]);
-          $found[$match[1]] = $match[1];
-          $found[$match[1] . "s"] = $match[1] . "s";
-        }
-      }
-      if (preg_match_all("#[ \t\n(]plural\\(\"([^\"]+)\",[ \t\n]\"([^\"]+)\",[ \t\n][^\"].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[1] = strip_i18n_key($match[1]);
-          $match[2] = strip_i18n_key($match[2]);
-          $found[$match[1]] = $match[1];
-          $found[$match[2]] = $match[2];
-        }
-      }
-      if (preg_match_all("#[ \t\n(]plural\\('([^']+)',[ \t\n]'([^']+)',[ \t\n][^'].*?\\)#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[1] = strip_i18n_key($match[1]);
-          $match[2] = strip_i18n_key($match[2]);
-          $found[$match[1]] = $match[1];
-          $found[$match[2]] = $match[2];
-        }
-      }
-    }
 
-    // find instances of "string" /* i18n */
-    foreach ($json['translation_markers'] as $translation_marker) {
-      if (preg_match_all("#\"([^\"]+)\" /\\* " . $translation_marker . " \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[2] = strip_i18n_key($match[1]);
-          $found[$match[1]] = $match[1];
+      // find instances of "string" /* i18n */
+      foreach ($json['translation_markers'] as $translation_marker) {
+        if (preg_match_all("#\"([^\"]+)\" /\\* " . $translation_marker . " \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[2] = strip_i18n_key($match[1]);
+            $found[$match[1]] = $match[1];
+          }
         }
-      }
-      if (preg_match_all("#'([^']+)' /\\* " . $translation_marker . " \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-          // remove whitespace that will never display
-          $match[2] = strip_i18n_key($match[1]);
-          $found[$match[1]] = $match[1];
+        if (preg_match_all("#'([^']+)' /\\* " . $translation_marker . " \\*/#ims", $input, $matches, PREG_SET_ORDER)) {
+          foreach ($matches as $match) {
+            // remove whitespace that will never display
+            $match[2] = strip_i18n_key($match[1]);
+            $found[$match[1]] = $match[1];
+          }
         }
       }
     }
