@@ -25,6 +25,13 @@ if (!$json) {
   throw new Exception("$json_file was not valid JSON");
 }
 
+$debug = false;
+foreach ($argv as $value) {
+  if ($value === "--debug") {
+    $debug = true;
+  }
+}
+
 // add default parameters
 $json += array(
   'templates' => 'vendor/*/*',
@@ -37,6 +44,10 @@ $json += array(
   'include_plural' => true,
   'depth' => 3,
 );
+
+if ($debug) {
+  echo "Loaded JSON: " . print_r($json, true) . "\n";
+}
 
 if (!is_array($json['templates'])) {
   $json['templates'] = array($json['templates']);
@@ -82,10 +93,14 @@ foreach ($all_dirs as $dir) {
         }
       }
       if ($should_ignore) {
+        if ($debug) {
+          echo "Ignoring ignored template folder '$f'\n";
+        }
         continue;
       }
 
       $input = file_get_contents($f);
+      $input = str_replace("\r\n", "\n", $input);
       $input = strip_comments($input);
 
       // find instances of t() and ht()
